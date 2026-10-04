@@ -1,0 +1,52 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>Éclore 미리보기 프레임</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+body{margin:0;background:#2b2326;color:#eee;font:13px/1.4 system-ui,sans-serif}
+header{display:flex;gap:16px;align-items:center;padding:10px 16px}
+header a{color:#f3b6c4}
+label{cursor:pointer}
+main{display:flex;gap:24px;align-items:flex-start;padding:0 16px 24px;overflow-x:auto}
+figure{margin:0;flex:none}
+figcaption{margin-bottom:6px;color:#bbb}
+.box{overflow:hidden;background:#fff;box-shadow:0 0 0 1px #000}
+iframe{border:0;transform-origin:0 0;display:block}
+</style></head><body>
+<header><b>Éclore 미리보기</b>
+<label><input type="checkbox" id="sync" checked> 스크롤 비율 맞추기</label>
+<a href="./" target="_blank">실제 페이지 새 탭으로</a></header>
+<main id="m"></main>
+<script>
+const VPS = [[360, 780], [390, 844], [1440, 900]];
+const m = document.getElementById('m');
+const frames = VPS.map(([w, h]) => {
+  const f = document.createElement('figure');
+  f.innerHTML = `<figcaption>${w}×${h}</figcaption><div class="box"><iframe src="./" width="${w}" height="${h}"></iframe></div>`;
+  m.append(f);
+  return {w, h, box: f.querySelector('.box'), ifr: f.querySelector('iframe')};
+});
+function fit() {
+  const avail = innerHeight - 70;
+  const phones = frames.filter(f => f.w < 1000);
+  const used = phones.reduce((a, f) => a + f.w * Math.min(1, avail / f.h) + 24, 32);
+  for (const f of frames) {
+    const s = f.w < 1000 ? Math.min(1, avail / f.h) : Math.min(1, avail / f.h, (innerWidth - used) / f.w);
+    f.ifr.style.transform = `scale(${s})`;
+    f.box.style.width = f.w * s + 'px';
+    f.box.style.height = f.h * s + 'px';
+  }
+}
+addEventListener('resize', fit); fit();
+let syncing = false;
+for (const f of frames) f.ifr.addEventListener('load', () => {
+  f.ifr.contentWindow.addEventListener('scroll', () => {
+    if (syncing || !document.getElementById('sync').checked) return;
+    const d = f.ifr.contentDocument.documentElement, r = f.ifr.contentWindow.scrollY / Math.max(1, d.scrollHeight - f.h);
+    syncing = true;
+    for (const g of frames) if (g !== f) {
+      const e = g.ifr.contentDocument.documentElement;
+      g.ifr.contentWindow.scrollTo({top: r * (e.scrollHeight - g.h), behavior: 'instant'});
+    }
+    requestAnimationFrame(() => syncing = false);
+  });
+});
+</script></body></html>
