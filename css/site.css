@@ -196,6 +196,17 @@ summary:focus-visible {
   transform: translate(-50%, -50%);
 }
 .hero__title img { width: 100%; }
+.intro-wait .hero__title img,
+.intro-wait .hero .obj img,
+.intro-wait .hero__scroll {
+  opacity: 0;
+  animation: intro-failsafe .4s ease 4s forwards;
+}
+@keyframes intro-failsafe { to { opacity: 1; } }
+.intro-run .hero__title img,
+.intro-run .hero .obj img,
+.intro-run .hero__scroll { opacity: 0; }
+.intro-run .hero__title .title-write { display: block; }
 .hero__title .title-write {
   position: absolute;
   inset: 0;

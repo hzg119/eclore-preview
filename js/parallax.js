@@ -190,6 +190,10 @@ export function initParallax() {
   }).observe(document.body);
   if (document.fonts) document.fonts.ready.then(remeasure);
   reduce.addEventListener?.('change', remeasure);
+  // bfcache 복원: 저장된 transform을 버리고 다시 잰다 (인트로 다시 재생과 함께)
+  addEventListener('pageshow', (e) => {
+    if (e.persisted) remeasure();
+  });
   addEventListener('eclore:edit', (e) => {
     paused = !!e.detail;
     remeasure();
