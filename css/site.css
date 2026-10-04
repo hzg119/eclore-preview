@@ -34,6 +34,9 @@
     --lvh: 1lvh;
   }
 }
+:root {
+  --vhl: var(--svh);
+}
 *, *::before, *::after { box-sizing: border-box; }
 html {
   -webkit-text-size-adjust: 100%;
@@ -140,7 +143,7 @@ summary:focus-visible {
 .bg {
   position: fixed;
   inset: 0 0 auto 0;
-  height: calc(100 * var(--lvh));
+  height: max(calc(100 * var(--lvh)), calc(135 * var(--vhl)));
   z-index: -1;
   pointer-events: none;
 }
@@ -162,7 +165,7 @@ summary:focus-visible {
   --x: var(--mx); --y: var(--my); --w: var(--mw); --r: var(--mr);
   position: absolute;
   left: calc(var(--x) * 1vw);
-  top: calc(var(--y) * var(--svh));
+  top: calc(var(--y) * var(--vhl));
   width: calc(var(--w) * 1vw);
   z-index: var(--z);
   opacity: var(--o);
@@ -173,14 +176,14 @@ summary:focus-visible {
 @media (min-aspect-ratio: 4/5) {
   .obj {
     --x: var(--dx); --y: var(--dy); --w: var(--dw); --r: var(--dr);
-    width: calc(var(--w) * min(1vw, 1.6 * var(--svh)));
+    width: calc(var(--w) * min(1vw, 1.6 * var(--vhl)));
   }
   .obj--d-only { display: block; }
   .obj--m-only { display: none; }
 }
 .hero {
   position: relative;
-  height: calc(100 * var(--svh));
+  height: calc(100 * var(--vhl));
   min-height: 520px;
 }
 .hero__title {
@@ -208,7 +211,7 @@ summary:focus-visible {
 @media (min-aspect-ratio: 4/5) {
   .hero__title {
     top: 47%;
-    width: min(46vw, 74 * var(--svh));
+    width: min(46vw, 74 * var(--vhl));
   }
 }
 .info,
