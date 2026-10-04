@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>제목 획 미리보기</title>
+<style>
+  body { margin: 0; background: #2b2326; color: #eee; font: 13px/1.5 system-ui, -apple-system, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 16px; }
+  header b { color: #ffb3c4; }
+  button, select, input { font: inherit; }
+  button { padding: 4px 10px; border: 0; border-radius: 4px; background: #f4ecee; color: #2a1d21; cursor: pointer; }
+  button.primary { background: #b72c50; color: #fff; }
+  .stage { position: relative; margin: 8px 16px; background: #F8F1EB; border-radius: 6px; }
+  .stage svg { display: block; width: 100%; height: auto; }
+  .stage .overlay { position: absolute; inset: 0; pointer-events: none; }
+  .ghost { position: absolute; inset: 0; width: 100%; opacity: .12; }
+  main { display: grid; grid-template-columns: 1fr 340px; gap: 0 8px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  aside { padding: 8px 16px 24px; }
+  .glyph { margin-bottom: 10px; padding: 8px; border-radius: 6px; background: rgba(255,255,255,.06); }
+  .glyph h3 { margin: 0 0 4px; font-size: 13px; display: flex; gap: 6px; align-items: center; }
+  .stroke { display: flex; gap: 4px; align-items: center; margin: 3px 0; }
+  .stroke input { width: 56px; }
+  .muted { color: #b9aab0; }
+  .timing label { display: block; margin: 4px 0; }
+  .timing input { width: 70px; }
+  #status { color: #9fe0a8; min-height: 1.5em; }
+  .low { color: #ff9c9c; }
+</style>
+</head>
+<body>
+<header>
+  <b>제목 획 미리보기</b>
+  <button class="primary" id="play">▶ 재생</button>
+  <button id="prev">◀ 한 획</button><button id="next">한 획 ▶</button>
+  <label>속도 <select id="speed"><option value=".25">0.25×</option><option value=".5">0.5×</option><option value="1" selected>1×</option></select></label>
+  <label><input type="checkbox" id="lines" checked> 획 번호·방향 보기</label>
+  <label><input type="checkbox" id="ghost" checked> 완성 제목 옅게 깔기</label>
+  <span class="muted" id="info"></span>
+</header>
+<main>
+  <div>
+    <div class="stage" id="stage"></div>
+    <p class="muted" style="margin: 0 16px">노란 원 = 획 시작(번호 = 쓰는 순서), 작은 점 = 획 끝. 경로 모양을 바꾸고 싶으면 번호와 함께 말로 알려 주세요.</p>
+  </div>
+  <aside>
+    <div id="list"></div>
+    <div class="timing glyph">
+      <h3>타이밍 (ms)</h3>
+      <label>쓰기 전체 <input type="number" step="50" data-t="write_ms"></label>
+      <label>글자 사이 쉼 <input type="number" step="10" data-t="letter_pause_ms"></label>
+      <label>획 사이 쉼 <input type="number" step="10" data-t="stroke_pause_ms"></label>
+    </div>
+    <div class="glyph">
+      <h3>덮임 % <span class="muted">(굵기를 바꾸면 tools/title_strokes.py로 다시 계산)</span></h3>
+      <div id="coverage"></div>
+    </div>
+    <div style="display:flex; gap:6px">
+      <button class="primary" id="save" hidden>저장</button>
+      <button id="copy">복사</button>
+    </div>
+    <div id="status"></div>
+  </aside>
+</main>
+<script type="application/json" id="strokes-data">{"note": "제목 획 데이터. order = 쓰는 순서, glyphs[].strokes = 그 글자의 획(쓰는 방향대로). region은 tools/title_strokes.py가 매번 다시 계산. 획별 굵기는 strokes[].w로 덮어쓴다.", "viewBox": [2076, 757], "stroke_width": 126, "order": ["E", "c", "l", "o", "r", "e", "accent"], "timing": {"start_ms": 400, "write_ms": 2200, "letter_pause_ms": 80, "stroke_pause_ms": 40, "bloom_from_ms": 200, "bloom_to_ms": 1600, "bloom_each_ms": 650, "hint_ms": 2600, "crossfade_ms": 150}, "coverage": {"E": 99.62, "accent": 100.0, "c": 100.0, "l": 99.99, "o": 100.0, "r": 99.2, "e": 100.0}, "glyphs": [{"id": "E", "region": "M399.0,756.5 L-0.5,756.0 L-0.5,71.0 L99.0,151.5 L159.0,193.5 L193.0,211.5 L212.0,218.5 L231.0,222.5 L247.0,222.5 L262.0,219.5 L285.0,209.5 L386.0,159.5 L483.0,107.5 L727.0,10.5 L727.5,92.0 L724.5,120.0 L651.5,219.0 L606.5,271.0 L554.0,315.5 L490.5,357.0 L483.5,412.0 L465.5,459.0 L438.5,498.0 L399.5,538.0 L414.5,568.0 L421.5,588.0 L425.5,605.0 L425.5,632.0 L399.0,756.5 Z", "strokes": [{"d": "M215.0,328.0 L217.0,352.0 L211.0,386.0 L211.0,431.0 L203.0,470.0 L187.0,480.0 L181.0,488.0 L119.0,598.0 L104.0,669.0"}, {"d": "M159.0,330.0 L190.0,326.0 L214.0,327.0 L229.0,298.0 L245.0,286.0 L267.0,277.0 L421.0,227.0 L469.0,208.0 L476.0,208.0"}, {"d": "M203.0,471.0 L208.0,476.0 L223.0,478.0 L292.0,470.0 L330.0,460.0 L376.0,441.0 L388.0,439.0"}, {"d": "M83.0,675.0 L103.0,670.0 L114.0,689.0 L123.0,694.0 L208.0,686.0 L252.0,675.0 L310.0,656.0 L343.0,643.0 L377.0,624.0 L388.0,622.0"}]}, {"id": "accent", "region": "M247.0,222.5 L231.0,222.5 L212.0,218.5 L193.0,211.5 L159.0,193.5 L99.0,151.5 L0.0,70.5 L-0.5,0.0 L730.5,0.0 L728.5,9.0 L723.0,12.5 L483.0,107.5 L386.0,159.5 L285.0,209.5 L262.0,219.5 L247.0,222.5 Z", "strokes": [{"d": "M415.0,39.0 L406.0,41.0 L374.0,69.0 L255.0,191.0"}]}, {"id": "c", "region": "M738.0,756.5 L399.5,756.0 L425.5,632.0 L425.5,605.0 L421.5,588.0 L414.5,568.0 L399.5,538.0 L438.5,498.0 L465.5,459.0 L483.5,412.0 L490.5,357.0 L554.0,315.5 L606.5,271.0 L651.5,219.0 L726.0,117.5 L778.5,198.0 L804.5,244.0 L825.5,302.0 L835.5,346.0 L833.5,391.0 L822.5,429.0 L801.5,469.0 L784.5,492.0 L803.5,546.0 L805.5,559.0 L803.5,580.0 L793.5,610.0 L755.5,694.0 L738.0,756.5 Z", "strokes": [{"d": "M743.0,417.0 L746.0,407.0 L746.0,392.0 L744.0,390.0 L722.0,387.0 L681.0,394.0 L670.0,398.0 L632.0,421.0 L591.0,455.0 L547.0,502.0 L513.0,550.0 L497.0,585.0 L490.0,629.0 L500.0,665.0 L505.0,674.0 L516.0,683.0 L530.0,689.0 L550.0,692.0 L595.0,687.0 L629.0,676.0 L669.0,653.0 L719.0,614.0 L751.0,580.0 L769.0,574.0"}]}, {"id": "l", "region": "M1017.0,756.5 L738.5,756.0 L755.5,694.0 L793.5,610.0 L803.5,580.0 L805.5,563.0 L803.5,546.0 L784.5,492.0 L801.5,469.0 L822.5,429.0 L833.5,391.0 L835.5,346.0 L825.5,302.0 L804.5,244.0 L778.5,198.0 L725.5,117.0 L727.5,92.0 L727.5,10.0 L730.5,0.0 L1365.0,-0.5 L1271.5,124.0 L1218.5,187.0 L1143.5,268.0 L1110.5,308.0 L1060.5,381.0 L1031.5,435.0 L1023.5,461.0 L1020.5,499.0 L1005.5,537.0 L1031.5,581.0 L1041.5,615.0 L1040.5,641.0 L1024.5,708.0 L1017.0,756.5 Z", "strokes": [{"d": "M1008.0,188.0 L988.0,214.0 L978.0,235.0 L964.0,273.0 L941.0,349.0 L932.0,370.0 L926.0,396.0 L909.0,445.0 L887.0,522.0 L867.0,580.0 L860.0,611.0 L856.0,650.0 L856.0,664.0 L863.0,687.0 L865.0,689.0 L877.0,690.0 L924.0,680.0 L938.0,675.0 L997.0,635.0 L1005.0,628.0 L1006.0,623.0"}]}, {"id": "o", "region": "M1340.0,756.5 L1018.0,756.5 L1022.5,718.0 L1040.5,641.0 L1041.5,615.0 L1031.5,581.0 L1005.5,537.0 L1020.5,499.0 L1021.5,473.0 L1026.5,449.0 L1041.5,414.0 L1086.5,341.0 L1125.5,289.0 L1237.5,165.0 L1286.5,105.0 L1366.0,-0.5 L1446.0,-0.5 L1454.5,284.0 L1442.5,329.0 L1430.5,398.0 L1422.5,494.0 L1413.5,544.0 L1394.5,611.0 L1360.5,694.0 L1340.0,756.5 Z", "strokes": [{"d": "M1100.0,467.0 L1115.0,462.0 L1131.0,462.0 L1147.0,478.0 L1139.0,519.0 L1115.0,570.0 L1108.0,601.0 L1104.0,630.0 L1109.0,654.0 L1115.0,670.0 L1127.0,683.0 L1135.0,688.0 L1147.0,692.0 L1167.0,694.0 L1212.0,688.0 L1226.0,684.0 L1242.0,676.0 L1270.0,656.0 L1320.0,601.0 L1331.0,584.0 L1347.0,548.0 L1358.0,483.0 L1351.0,450.0 L1340.0,430.0 L1320.0,410.0 L1300.0,401.0 L1272.0,398.0 L1220.0,406.0 L1203.0,415.0 L1172.0,448.0 L1148.0,478.0"}]}, {"id": "r", "region": "M1624.0,756.5 L1340.5,756.0 L1360.5,694.0 L1394.5,611.0 L1413.5,544.0 L1422.5,494.0 L1430.5,398.0 L1442.5,329.0 L1454.5,284.0 L1447.0,-0.5 L1788.5,1.0 L1798.5,284.0 L1797.5,344.0 L1792.5,393.0 L1776.5,448.0 L1757.5,485.0 L1742.5,506.0 L1721.0,527.5 L1690.0,549.5 L1641.0,570.5 L1637.5,574.0 L1629.5,605.0 L1622.5,655.0 L1621.5,721.0 L1624.0,756.5 Z", "strokes": [{"d": "M1445.0,702.0 L1447.0,678.0 L1455.0,654.0 L1489.0,516.0 L1501.0,487.0 L1516.0,466.0 L1544.0,453.0 L1586.0,409.0 L1601.0,402.0 L1627.0,397.0 L1640.0,397.0 L1675.0,403.0 L1690.0,410.0 L1707.0,426.0 L1711.0,433.0 L1708.0,463.0"}]}, {"id": "e", "region": "M2075.0,756.5 L1625.0,756.5 L1623.5,754.0 L1621.5,721.0 L1622.5,655.0 L1629.5,605.0 L1637.5,574.0 L1641.0,570.5 L1690.0,549.5 L1721.0,527.5 L1742.5,506.0 L1757.5,485.0 L1776.5,448.0 L1792.5,393.0 L1797.5,344.0 L1798.5,284.0 L1788.0,-0.5 L2075.5,0.0 L2075.0,756.5 Z", "strokes": [{"d": "M1827.0,528.0 L1834.0,535.0 L1842.0,538.0 L1893.0,533.0 L1931.0,523.0 L1955.0,510.0 L1971.0,498.0 L1995.0,474.0 L2003.0,463.0 L2010.0,445.0 L2017.0,413.0 L2010.0,389.0 L2001.0,380.0 L1995.0,378.0 L1985.0,376.0 L1959.0,378.0 L1937.0,382.0 L1915.0,392.0 L1887.0,412.0 L1858.0,442.0 L1844.0,462.0 L1827.0,527.0 L1810.0,536.0 L1800.0,551.0 L1794.0,568.0 L1787.0,614.0 L1794.0,644.0 L1801.0,661.0 L1822.0,681.0 L1840.0,689.0 L1855.0,692.0 L1878.0,691.0 L1926.0,683.0 L1962.0,666.0 L2000.0,639.0"}]}]}</script>
+<script type="module">
+import { writeTitle, setProgress, strokesOf, schedule, readTiming } from './js/title-write.js';
+
+const data = JSON.parse(document.getElementById('strokes-data').textContent);
+const TITLE = './img/title-1400.webp';
+const NAMES = { E: 'É (몸)', accent: '악센트', c: 'c', l: 'l', o: 'o', r: 'r', e: 'e' };
+const byId = () => Object.fromEntries(data.glyphs.map((g) => [g.id, g]));
+const [W, H] = data.viewBox;
+const pts = (d) => (d.match(/[-\d.]+,[-\d.]+/g) || []).map((p) => p.split(',').map(Number));
+const ptsD = (a) => 'M' + a.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L');
+let anims = [];
+let step = -1;
+
+function svgMarkup() {
+  const g = byId();
+  return `<img class="ghost" src="${TITLE}" alt="">
+  <svg class="title-write" viewBox="0 0 ${W} ${H}" data-timing='${JSON.stringify(data.timing)}'>
+  <defs>${data.glyphs.map((x) => `<clipPath id="pv-c-${x.id}" clipPathUnits="userSpaceOnUse"><path d="${x.region}"/></clipPath>`).join('')}
+  <mask id="pv-m" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}">
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="${data.stroke_width}">
+  ${data.order.map((id) => `<g clip-path="url(#pv-c-${id})">${g[id].strokes.map((s) => `<path d="${s.d}" pathLength="1" stroke-dasharray="1 2" data-glyph="${id}"${s.w ? ` stroke-width="${s.w}"` : ''}/>`).join('')}</g>`).join('')}
+  </g></mask></defs>
+  <image href="${TITLE}" width="${W}" height="${H}" preserveAspectRatio="none" mask="url(#pv-m)"/></svg>
+  <svg class="overlay" viewBox="0 0 ${W} ${H}">${overlay()}</svg>`;
+}
+
+function overlay() {
+  const g = byId();
+  let n = 0;
+  return data.order.map((id) => g[id].strokes.map((s) => {
+    n += 1;
+    const p = pts(s.d);
+    const [x0, y0] = p[0];
+    const [x1, y1] = p[p.length - 1];
+    return `<path d="${s.d}" fill="none" stroke="#1d2a6b" stroke-width="5" stroke-linejoin="round" opacity=".8"/>
+      <circle cx="${x1}" cy="${y1}" r="9" fill="#1d2a6b"/>
+      <circle cx="${x0}" cy="${y0}" r="22" fill="#ffd400" stroke="#1d2a6b" stroke-width="3"/>
+      <text x="${x0}" y="${y0 + 9}" text-anchor="middle" font-size="26" font-weight="700" fill="#1d2a6b">${n}</text>`;
+  }).join('')).join('');
+}
+
+function render() {
+  const stage = document.getElementById('stage');
+  stage.innerHTML = svgMarkup();
+  stage.querySelector('.overlay').style.display = document.getElementById('lines').checked ? '' : 'none';
+  stage.querySelector('.ghost').style.display = document.getElementById('ghost').checked ? '' : 'none';
+  setProgress(strokesOf(stage.querySelector('.title-write')), true);
+  step = -1;
+  list();
+  const t = readTiming(stage.querySelector('.title-write'));
+  const plan = schedule(strokesOf(stage.querySelector('.title-write')), t);
+  const end = plan.length ? plan[plan.length - 1].at + plan[plan.length - 1].dur : 0;
+  document.getElementById('info').textContent = `획 ${plan.length}개 · 쓰기 ${Math.round(end)}ms · 굵기 ${data.stroke_width}px`;
+}
+
+function list() {
+  const g = byId();
+  let n = 0;
+  document.getElementById('list').innerHTML = data.order.map((id, gi) => `
+    <div class="glyph"><h3>${NAMES[id] || id}
+      <button data-a="gup" data-g="${gi}">↑</button><button data-a="gdown" data-g="${gi}">↓</button></h3>
+      ${g[id].strokes.map((s, si) => { n += 1; return `<div class="stroke"><b>${n}</b>
+        <button data-a="up" data-id="${id}" data-s="${si}">↑</button><button data-a="down" data-id="${id}" data-s="${si}">↓</button>
+        <button data-a="rev" data-id="${id}" data-s="${si}">방향 뒤집기</button>
+        <input type="number" step="2" placeholder="${data.stroke_width}" value="${s.w || ''}" data-w="${id}:${si}" title="굵기(px)"></div>`; }).join('')}
+    </div>`).join('');
+  document.getElementById('coverage').innerHTML = Object.entries(data.coverage || {})
+    .map(([k, v]) => `<span class="${v < 99 ? 'low' : ''}">${NAMES[k] || k} ${v}%</span>`).join(' · ');
+  for (const inp of document.querySelectorAll('[data-t]')) inp.value = data.timing[inp.dataset.t];
+}
+
+function stop() { for (const a of anims) a.cancel(); anims = []; }
+
+document.getElementById('play').onclick = () => {
+  stop();
+  const svg = document.querySelector('#stage .title-write');
+  anims = writeTitle(svg, { speed: parseFloat(document.getElementById('speed').value) });
+};
+function showStep(k) {
+  stop();
+  const s = strokesOf(document.querySelector('#stage .title-write'));
+  step = Math.max(-1, Math.min(s.length - 1, k));
+  s.forEach((x, i) => { x.el.style.strokeDashoffset = i <= step ? '0' : '1'; x.el.style.strokeOpacity = i <= step ? '1' : '0'; });
+  document.getElementById('status').textContent = step < 0 ? '' : `${step + 1}번 획까지`;
+}
+document.getElementById('next').onclick = () => showStep(step + 1);
+document.getElementById('prev').onclick = () => showStep(step - 1);
+document.getElementById('lines').onchange = render;
+document.getElementById('ghost').onchange = render;
+
+document.getElementById('list').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  const a = b.dataset.a;
+  if (a === 'gup' || a === 'gdown') {
+    const i = +b.dataset.g, j = a === 'gup' ? i - 1 : i + 1;
+    if (j < 0 || j >= data.order.length) return;
+    [data.order[i], data.order[j]] = [data.order[j], data.order[i]];
+  } else {
+    const st = byId()[b.dataset.id].strokes, i = +b.dataset.s;
+    if (a === 'rev') st[i].d = ptsD(pts(st[i].d).reverse());
+    else {
+      const j = a === 'up' ? i - 1 : i + 1;
+      if (j < 0 || j >= st.length) return;
+      [st[i], st[j]] = [st[j], st[i]];
+    }
+  }
+  dirty();
+});
+document.getElementById('list').addEventListener('change', (e) => {
+  const w = e.target.dataset.w;
+  if (!w) return;
+  const [id, si] = w.split(':');
+  const s = byId()[id].strokes[+si];
+  if (e.target.value) s.w = +e.target.value; else delete s.w;
+  dirty();
+});
+for (const inp of document.querySelectorAll('[data-t]')) {
+  inp.onchange = () => { data.timing[inp.dataset.t] = +inp.value; dirty(); };
+}
+function dirty() { render(); document.getElementById('status').textContent = '바뀜 · 저장하거나 복사하세요'; }
+
+const payload = () => ({ order: data.order, timing: data.timing, glyphs: data.glyphs.map((g) => ({ id: g.id, strokes: g.strokes })) });
+document.getElementById('copy').onclick = async () => {
+  const text = JSON.stringify(payload(), null, 1);
+  try { await navigator.clipboard.writeText(text); } catch {
+    const ta = Object.assign(document.createElement('textarea'), { value: text }); document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  document.getElementById('status').textContent = '복사됨 · 그대로 보내 주세요';
+};
+fetch('/__version', { cache: 'no-store' }).then(async (r) => { await r.text(); if (r.ok) document.getElementById('save').hidden = false; }).catch(() => {});
+document.getElementById('save').onclick = async () => {
+  const r = await fetch('/__strokes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload()) });
+  document.getElementById('status').textContent = r.ok ? '저장됨 · 다시 빌드 중…' : `저장 실패: ${await r.text()}`;
+  if (r.ok) setTimeout(() => location.reload(), 1500);
+};
+
+render();
+</script>
+</body>
+</html>
