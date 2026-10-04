@@ -13,14 +13,16 @@ iframe{border:0;transform-origin:0 0;display:block}
 </style></head><body>
 <header><b>Éclore 미리보기</b>
 <label><input type="checkbox" id="sync" checked> 스크롤 비율 맞추기</label>
-<a href="./" target="_blank">실제 페이지 새 탭으로</a></header>
+<a href="./" target="_blank">실제 페이지 새 탭으로</a>
+<a id="edl" href="?edit">배치 편집 모드</a></header>
 <main id="m"></main>
 <script>
 const VPS = [[360, 780], [390, 844], [1440, 900]];
 const m = document.getElementById('m');
+if (location.search.includes('edit')) { const a = document.getElementById('edl'); a.textContent = '편집 끄기'; a.href = '?'; }
 const frames = VPS.map(([w, h]) => {
   const f = document.createElement('figure');
-  f.innerHTML = `<figcaption>${w}×${h}</figcaption><div class="box"><iframe src="./" width="${w}" height="${h}"></iframe></div>`;
+  f.innerHTML = `<figcaption>${w}×${h}</figcaption><div class="box"><iframe src="./${location.search}" width="${w}" height="${h}"></iframe></div>`;
   m.append(f);
   return {w, h, box: f.querySelector('.box'), ifr: f.querySelector('iframe')};
 });

@@ -161,6 +161,7 @@ summary:focus-visible {
   overflow-x: clip;
   overflow-y: visible;
 }
+.scene--near { z-index: 40; }   
 .obj {
   --x: var(--mx); --y: var(--my); --w: var(--mw); --r: var(--mr);
   position: absolute;
@@ -403,7 +404,7 @@ summary:focus-visible {
 .footer__host img { width: 120px; }
 .sticky-cta {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
   right: calc(env(safe-area-inset-right, 0px) + 12px);
   z-index: var(--z-sticky);
   opacity: 0;
@@ -419,22 +420,25 @@ summary:focus-visible {
 }
 .sticky-cta .btn-book {
   position: relative;
-  min-width: 34vw;          
-  min-height: 42px;
+  isolation: isolate;
+  min-width: 34vw;
+  min-height: 48px;
   padding: 0 1.2em;
+  background: none;
   font-size: var(--fs-s);
   letter-spacing: .03em;
-}
-@media (min-aspect-ratio: 4/5) {
-  .sticky-cta .btn-book {
-    min-width: 152px;
-    min-height: 40px;
-  }
 }
 .sticky-cta .btn-book::before {
   content: "";
   position: absolute;
-  inset: -6px -4px;
+  inset: 4px 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--rose);
+}
+.sticky-cta .btn-book.is-todo { outline-offset: -1px; }
+@media (min-aspect-ratio: 4/5) {
+  .sticky-cta .btn-book { min-width: 152px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sticky-cta,
