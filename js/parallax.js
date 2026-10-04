@@ -9,7 +9,8 @@
 // 위치는 로드·폭 변화·페이지 높이 변화(폰트 교체, FAQ 열고 닫기) 때만 잰다. 매 프레임 레이아웃을 읽지 않는다.
 // transform만 쓴다. prefers-reduced-motion이거나 편집기(?edit)가 켜지면 멈추고 원래 자리로.
 
-const FADE_SPAN = 0.18;   // 첫 화면 진행도 기준: 글자와 겹치기 이만큼 전부터 투명해진다
+const FADE_SPAN = 0.18;
+const INNER = 0.76;      // 겹침 판정에 쓰는 오브제 상자 비율   // 첫 화면 진행도 기준: 글자와 겹치기 이만큼 전부터 투명해진다
 
 const smooth = (a, b, x) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
@@ -95,8 +96,9 @@ export function initParallax() {
               const s = 1 + grow * p;
               const fx = cx + sx * p;
               const fy = cy + syv * p + (1 - speed) * heroH * p;
-              const hw = (r.width * s) / 2;
-              const hh = (r.height * s) / 2;
+              // 둥근 방울·꽃잎의 투명한 모서리는 빼고 (상자 안쪽 76%)
+              const hw = (r.width * s * INNER) / 2;
+              const hh = (r.height * s * INNER) / 2;
               if (hits([fx - hw, fy - hh, fx + hw, fy + hh])) {
                 it.fade = [Math.max(0, p - FADE_SPAN), Math.max(0.001, p)];
                 break;
