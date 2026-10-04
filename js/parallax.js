@@ -4,7 +4,7 @@
 //  - 첫 화면 오브제: 스크롤 0에서 이동 0. 첫 화면 높이만큼만 움직이고 그 뒤로는 멈춰 본문과 함께 빠진다
 //    (느린 층이 계속 따라와 정보 블록에 들어오지 않게). 같은 구간에서 제목 중심 바깥으로 퍼진다(spread).
 //    올라오는 정보 블록 글자와 겹칠 오브제는 겹치기 직전에 서서히 투명해진다.
-//  - 섹션 오브제: 그 섹션이 화면 가운데 올 때 이동 0.
+//  - 섹션 오브제: 그 오브제가 화면 가운데 올 때 이동 0 → scene.json에 놓은 자리가 '가운데 왔을 때의 모습'.
 //  - 배경(고정 div): r 속도로 아주 천천히 올라간다.
 // 위치는 로드·폭 변화·페이지 높이 변화(폰트 교체, FAQ 열고 닫기) 때만 잰다. 매 프레임 레이아웃을 읽지 않는다.
 // transform만 쓴다. prefers-reduced-motion이거나 편집기(?edit)가 켜지면 멈추고 원래 자리로.
@@ -69,7 +69,6 @@ export function initParallax() {
       const anchor = scene.parentElement;
       const isHero = scene.dataset.anchor === 'hero';
       const vertical = parseFloat(scene.dataset.spreadVertical || '1');
-      const a = anchor.getBoundingClientRect();
       const items = [...scene.querySelectorAll('.obj')]
         .filter((el) => el.offsetWidth)   // 이 구도에서 숨긴 오브제 제외
         .map((el) => {
@@ -84,6 +83,7 @@ export function initParallax() {
           const syv = (cy - tc[1]) * spread * vertical;
           const it = {
             el, speed, grow, sx, sy: syv,
+            s0: cy - vh / 2,   // 섹션 오브제 기준점: 자기 중심이 화면 가운데 올 때
             rot: parseFloat(cs.getPropertyValue('--r')) || 0,
             o: parseFloat(cs.opacity) || 1,
             fade: null,
@@ -105,10 +105,7 @@ export function initParallax() {
           }
           return it;
         });
-      return {
-        scene, items, hero: isHero, active: isHero, last: null,
-        s0: isHero ? 0 : a.top + sy + a.height / 2 - vh / 2,
-      };
+      return { scene, items, hero: isHero, active: isHero, last: null };
     });
 
     if (bg && bgSpeed) {
@@ -136,10 +133,9 @@ export function initParallax() {
         g.last = d;
         const moving = d < heroH;
         for (const it of g.items) it.el.style.willChange = moving ? 'transform' : '';
-      } else {
-        d = Math.min(Math.max(y - g.s0, -vh), vh);
       }
       for (const it of g.items) {
+        if (!g.hero) d = Math.min(Math.max(y - it.s0, -vh), vh);
         const tx = it.sx * p;
         const ty = (1 - it.speed) * d + it.sy * p;
         const s = 1 + it.grow * p;
