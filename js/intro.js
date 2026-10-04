@@ -100,7 +100,7 @@ export function initIntro() {
 
     // 스크롤 화살표
     const hint = hero.querySelector('.hero__scroll');
-    if (hint) anims.push(hint.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: t.hint_ms, fill: 'both' }));
+    if (hint) anims.push(hint.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: Math.min(t.hint_ms, writeEnd), fill: 'both' }));
 
     await Promise.all(anims.map((a) => a.finished.catch(() => {})));
     if (playing) done();

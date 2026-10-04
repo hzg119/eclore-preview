@@ -13,22 +13,34 @@ export function strokesOf(svg) {
   }));
 }
 
-// 각 획의 시작 시각·길이(ms). total = 쓰기 전체 길이(쉼 포함)
+// 각 획의 시작 시각·길이(ms).
+// write_ms = 획을 긋는 시간의 합 (길이에 비례해 나눔). 한 글자 안의 획은 차례로(사이 stroke_pause_ms),
+// 다음 글자는 앞 글자가 (1 − letter_overlap)만큼 써졌을 때 미리 시작한다 (+ letter_pause_ms).
 export function schedule(strokes, t) {
-  const pauses = strokes.reduce((n, s, i) => {
-    if (!i) return n;
-    return n + (s.glyph !== strokes[i - 1].glyph ? t.letter_pause_ms : t.stroke_pause_ms);
-  }, 0);
+  const overlap = t.letter_overlap || 0;
   const totalLen = strokes.reduce((a, s) => a + s.len, 0) || 1;
-  const drawMs = Math.max(200, t.write_ms - pauses);
-  let at = 0;
-  return strokes.map((s, i) => {
-    if (i) at += s.glyph !== strokes[i - 1].glyph ? t.letter_pause_ms : t.stroke_pause_ms;
-    const dur = (drawMs * s.len) / totalLen;
-    const item = { ...s, at, dur };
-    at += dur;
-    return item;
-  });
+  const letters = [];
+  for (const s of strokes) {
+    const last = letters[letters.length - 1];
+    if (last && last.glyph === s.glyph) last.items.push(s);
+    else letters.push({ glyph: s.glyph, items: [s] });
+  }
+  const intra = letters.reduce((n, l) => n + (l.items.length - 1) * t.stroke_pause_ms, 0);
+  const drawMs = Math.max(200, t.write_ms - intra);
+  const out = [];
+  let start = 0;
+  for (const l of letters) {
+    let at = start;
+    for (const [j, s] of l.items.entries()) {
+      if (j) at += t.stroke_pause_ms;
+      const dur = (drawMs * s.len) / totalLen;
+      out.push({ ...s, at, dur });
+      at += dur;
+    }
+    const letterDur = at - start;
+    start = start + letterDur * (1 - overlap) + t.letter_pause_ms;
+  }
+  return out;
 }
 
 export function setProgress(strokes, shown) {
