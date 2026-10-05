@@ -1,6 +1,6 @@
 @font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-ExtraLight.6883f3f7.woff2") format("woff2");font-weight:200;font-style:normal;font-display:swap}
-@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Light.9ee1e991.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
-@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Regular.93547982.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Light.d87c43e9.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Regular.6aa9340e.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-SemiBold.20a45364.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
 :root {
   --bg: #F8F1EB;
@@ -339,6 +339,10 @@ summary:focus-visible {
 .program__note { margin-top: 4px; font-size: var(--fs-s); }
 .running { margin-top: 36px; color: var(--ink-soft); }
 .running .w-sb { margin-right: .6em; color: var(--ink); }
+.fiat__motto { color: var(--rose); font-size: var(--fs-l); line-height: 1.5; }
+.sec .fiat__motto + p { margin-top: .6em; }
+.fiat__activities { display: grid; gap: 2px; margin-top: 14px; font-size: var(--fs-s); color: var(--ink-soft); }
+.fiat__activities li::before { content: "·"; margin-right: .5em; color: var(--rose); }
 .roster {
   display: grid;
   gap: 10px;
