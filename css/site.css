@@ -1,6 +1,6 @@
 @font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-ExtraLight.6883f3f7.woff2") format("woff2");font-weight:200;font-style:normal;font-display:swap}
-@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Light.d87c43e9.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
-@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Regular.6aa9340e.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Light.c7820773.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-Regular.b88b9363.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"MaruBuri";src:url("../fonts/MaruBuri-SemiBold.20a45364.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
 :root {
   --bg: #F8F1EB;
@@ -339,8 +339,14 @@ summary:focus-visible {
 .program__note { margin-top: 4px; font-size: var(--fs-s); }
 .running { margin-top: 36px; color: var(--ink-soft); }
 .running .w-sb { margin-right: .6em; color: var(--ink); }
+.fiat__head { display: flex; align-items: center; gap: 16px; }
+.fiat__logo { flex: none; width: 88px; }
 .fiat__motto { color: var(--rose); font-size: var(--fs-l); line-height: 1.5; }
-.sec .fiat__motto + p { margin-top: .6em; }
+.fiat__intro { margin-top: .3em; }
+@media (min-aspect-ratio: 4/5) {
+  .fiat__head { gap: 22px; }
+  .fiat__logo { width: 108px; }
+}
 .fiat__activities { display: grid; gap: 2px; margin-top: 14px; font-size: var(--fs-s); color: var(--ink-soft); }
 .fiat__activities li::before { content: "·"; margin-right: .5em; color: var(--rose); }
 .roster {
@@ -375,6 +381,38 @@ summary:focus-visible {
   text-align: center;
 }
 .history { display: grid; gap: 6px; }
+.posters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px 14px;
+}
+.posters figure { margin: 0; }
+.posters img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  object-position: center bottom;
+  border-radius: 3px;
+}
+.posters figcaption {
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+  line-height: 1.55;
+  text-align: center;
+}
+.posters figcaption .w-sb { color: var(--ink); }
+.posters__title { color: var(--ink); font-size: var(--fs-s); }
+@media (min-aspect-ratio: 4/5) {
+  .posters {
+    grid-template-columns: repeat(4, 1fr);
+    width: min(880px, calc(100vw - 2 * var(--gutter)));
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 18px;
+  }
+}
 .history .w-sb { margin-right: .6em; }
 .event-terms {
   display: grid;
@@ -434,7 +472,12 @@ summary:focus-visible {
   font-size: var(--fs-xs);
   text-align: center;
 }
-.footer__presenter { color: var(--ink-deep); }
+.footer__presenter { color: var(--ink-deep); line-height: 1.6; }
+@media (min-aspect-ratio: 4/5) {
+  .footer { flex-direction: row; justify-content: center; gap: 0; }
+  .footer__presenter { padding-right: 24px; text-align: right; }
+  .footer__presenter + .footer__host { padding-left: 24px; border-left: 1px solid var(--line); min-height: 44px; }
+}
 .footer__host {
   display: flex;
   flex-wrap: wrap;
