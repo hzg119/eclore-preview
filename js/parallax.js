@@ -14,6 +14,8 @@
 //    (JS가 한두 프레임 늦게 따라가며 떨리는 현상 없음). ScrollTimeline이 없으면 기본 경로.
 //    위치는 스크롤 px 구간(rangeStart·rangeEnd)으로 준다 → 툴바가 접혀 스크롤 범위가 바뀌어도 어긋나지 않는다.
 //  - steady: 기본 경로 그대로, will-change를 켜고 끄지 않는다 (레이어를 다시 만들며 다시 그리는 비용 확인용).
+//  - nogrow: 첫 화면 오브제가 퍼질 때 커지지 않게 (크기가 바뀌면 사파리가 이미지를 다시 그리는지 확인용).
+//  - nospread: 퍼짐·커짐 없이 층 속도만. half: 층 속도 차이를 절반으로.
 
 const FADE_SPAN = 0.18;
 const INNER = 0.76;      // 겹침 판정에 쓰는 오브제 상자 비율   // 첫 화면 진행도 기준: 글자와 겹치기 이만큼 전부터 투명해진다
@@ -23,7 +25,7 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
-export function initParallax({ timeline = false, steady = false } = {}) {
+export function initParallax({ timeline = false, steady = false, nogrow = false, nospread = false, half = false } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.documentElement;
   const hero = document.querySelector('.hero');
@@ -87,9 +89,10 @@ export function initParallax({ timeline = false, steady = false } = {}) {
           const cx = r.left + r.width / 2;
           const cy = r.top + sy + r.height / 2;
           const cs = getComputedStyle(el);
-          const speed = parseFloat(el.dataset.speed || '1');
-          const spread = parseFloat(el.dataset.spread || '0');
-          const grow = parseFloat(el.dataset.grow || '0');
+          const r0 = parseFloat(el.dataset.speed || '1');
+          const speed = half ? 1 - (1 - r0) / 2 : r0;
+          const spread = nospread ? 0 : parseFloat(el.dataset.spread || '0');
+          const grow = nogrow || nospread ? 0 : parseFloat(el.dataset.grow || '0');
           const sx = (cx - tc[0]) * spread;
           const syv = (cy - tc[1]) * spread * vertical;
           const it = {

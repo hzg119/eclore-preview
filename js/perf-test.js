@@ -8,6 +8,9 @@
 //   bg      배경 텍스처 빼기
 //   timeline  패럴랙스를 스크롤 타임라인 애니메이션으로 (스크롤과 같은 스레드, 지원 안 하면 기존 방식)
 //   steady    패럴랙스 기존 방식 + will-change 고정 (켜고 끄지 않음)
+//   nogrow    첫 화면 꽃이 퍼질 때 커지지 않게
+//   nospread  첫 화면 꽃이 퍼지지도 커지지도 않게 (층 속도만)
+//   half      층 속도 차이 절반 (덜 움직임)
 // 인트로 끄기는 기존 ?nointro.
 
 const HERO = '.hero .scene';
@@ -30,5 +33,6 @@ export function applyPerfTest(list) {
   badge.textContent = `perf: ${on.join(', ') || '-'}${tlNote}${/[?&]nointro\b/.test(location.search) ? ' + nointro' : ''}`;
   badge.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:99;padding:2px 6px;font:11px/1.4 monospace;color:#fff;background:rgba(0,0,0,.55);border-radius:3px;pointer-events:none';
   document.body.append(badge);
-  return { still: on.includes('still'), timeline: on.includes('timeline'), steady: on.includes('steady') };
+  const has = (k) => on.includes(k);
+  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half') };
 }
