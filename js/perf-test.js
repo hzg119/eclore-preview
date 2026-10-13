@@ -11,6 +11,8 @@
 //   nogrow    첫 화면 꽃이 퍼질 때 커지지 않게
 //   nospread  첫 화면 꽃이 퍼지지도 커지지도 않게 (층 속도만)
 //   half      층 속도 차이 절반 (덜 움직임)
+//   ease      새 위치로 0.15초 미끄러지게 (ease80, ease250처럼 ms 지정)
+//   lerp      매 프레임 목표 위치를 조금씩 따라가게
 // 인트로 끄기는 기존 ?nointro.
 
 const HERO = '.hero .scene';
@@ -38,5 +40,6 @@ export function applyPerfTest(list) {
   let n = 0;
   addEventListener('eclore:remeasure', () => { n += 1; badge.textContent = `${label} · 측정 ${n}`; });
   const has = (k) => on.includes(k);
-  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half') };
+  const e = on.find((k) => /^ease\d*$/.test(k));
+  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half'), ease: e ? parseInt(e.slice(4) || '150', 10) : 0, lerp: has('lerp') };
 }
