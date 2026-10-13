@@ -6,6 +6,8 @@
 //   sec     섹션 오브제 전부 빼기 (첫 화면만 남김)
 //   still   패럴랙스 끄기 (오브제가 제자리에 고정, 스크롤 계산 없음)
 //   bg      배경 텍스처 빼기
+//   timeline  패럴랙스를 스크롤 타임라인 애니메이션으로 (스크롤과 같은 스레드, 지원 안 하면 기존 방식)
+//   steady    패럴랙스 기존 방식 + will-change 고정 (켜고 끄지 않음)
 // 인트로 끄기는 기존 ?nointro.
 
 const HERO = '.hero .scene';
@@ -24,8 +26,9 @@ export function applyPerfTest(list) {
     if (REMOVE[k]) for (const el of document.querySelectorAll(REMOVE[k])) el.remove();
   }
   const badge = document.createElement('div');
-  badge.textContent = `perf: ${on.join(', ') || '-'}${/[?&]nointro\b/.test(location.search) ? ' + nointro' : ''}`;
+  const tlNote = on.includes('timeline') ? ('ScrollTimeline' in window ? ' (지원)' : ' (미지원 → 기존 방식)') : '';
+  badge.textContent = `perf: ${on.join(', ') || '-'}${tlNote}${/[?&]nointro\b/.test(location.search) ? ' + nointro' : ''}`;
   badge.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:99;padding:2px 6px;font:11px/1.4 monospace;color:#fff;background:rgba(0,0,0,.55);border-radius:3px;pointer-events:none';
   document.body.append(badge);
-  return { still: on.includes('still') };
+  return { still: on.includes('still'), timeline: on.includes('timeline'), steady: on.includes('steady') };
 }

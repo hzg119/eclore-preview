@@ -8,6 +8,12 @@
 //  - 배경(고정 div): r 속도로 아주 천천히 올라간다.
 // 위치는 로드·폭 변화·페이지 높이 변화(폰트 교체, FAQ 열고 닫기) 때만 잰다. 매 프레임 레이아웃을 읽지 않는다.
 // transform만 쓴다. prefers-reduced-motion이거나 편집기(?edit)가 켜지면 멈추고 원래 자리로.
+//
+// 실험 (미리보기 ?perf=timeline·steady, perf-test.js가 켠다. 정식 빌드는 기본 경로):
+//  - timeline: 같은 움직임을 스크롤 타임라인 애니메이션으로 → 브라우저가 스크롤과 같은 스레드에서 움직인다
+//    (JS가 한두 프레임 늦게 따라가며 떨리는 현상 없음). ScrollTimeline이 없으면 기본 경로.
+//    위치는 스크롤 px 구간(rangeStart·rangeEnd)으로 준다 → 툴바가 접혀 스크롤 범위가 바뀌어도 어긋나지 않는다.
+//  - steady: 기본 경로 그대로, will-change를 켜고 끄지 않는다 (레이어를 다시 만들며 다시 그리는 비용 확인용).
 
 const FADE_SPAN = 0.18;
 const INNER = 0.76;      // 겹침 판정에 쓰는 오브제 상자 비율   // 첫 화면 진행도 기준: 글자와 겹치기 이만큼 전부터 투명해진다
@@ -17,7 +23,7 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
-export function initParallax() {
+export function initParallax({ timeline = false, steady = false } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.documentElement;
   const hero = document.querySelector('.hero');
@@ -26,6 +32,8 @@ export function initParallax() {
   const bgSpeed = bg ? parseFloat(bg.dataset.speed) : 0;
   const scenes = [...document.querySelectorAll('.scene[data-anchor]')];
   if (!hero || !scenes.length) return;
+  const useTimeline = timeline && 'ScrollTimeline' in window;
+  let anims = [];
 
   let groups = [];
   let heroH = 1;
@@ -38,6 +46,8 @@ export function initParallax() {
   const enabled = () => !reduce.matches && !paused;
 
   function reset() {
+    for (const a of anims) a.cancel();
+    anims = [];
     for (const g of groups) for (const it of g.items) {
       it.el.style.transform = '';
       it.el.style.opacity = '';
@@ -115,13 +125,51 @@ export function initParallax() {
       bg.style.height = `${Math.ceil(Math.max(vh * 1.35, innerHeight + bgSpeed * maxScroll + 40))}px`;
     }
     lastHeight = root.scrollHeight;
+    if (useTimeline) return attachTimeline();
+    if (steady) for (const g of groups) for (const it of g.items) it.el.style.willChange = 'transform';
     for (const g of groups) observer.observe(g.scene.parentElement);
     schedule();
   }
 
+  const transformAt = (it, d, p) =>
+    `translate(-50%, -50%) translate3d(${(it.sx * p).toFixed(1)}px, ${((1 - it.speed) * d + it.sy * p).toFixed(1)}px, 0) rotate(${it.rot}deg) scale(${(1 + it.grow * p).toFixed(4)})`;
+
+  // frame()과 같은 움직임을 스크롤 px 구간 [a, b]의 선형 애니메이션으로 (구간 밖은 끝값 유지)
+  function attachTimeline() {
+    const tl = new ScrollTimeline({ source: root, axis: 'block' });
+    const add = (el, kf, a, b) =>
+      anims.push(el.animate(kf, { timeline: tl, rangeStart: `${a}px`, rangeEnd: `${b}px`, fill: 'both', easing: 'linear' }));
+    if (bg && bgSpeed) {
+      const end = root.scrollHeight + 2000;   // 선형이라 넉넉한 구간이면 된다
+      add(bg, [{ transform: 'translate3d(0, 0, 0)' }, { transform: `translate3d(0, ${(-bgSpeed * end).toFixed(1)}px, 0)` }], 0, end);
+    }
+    for (const g of groups) {
+      for (const it of g.items) {
+        if (g.hero) {
+          add(it.el, [{ transform: transformAt(it, 0, 0) }, { transform: transformAt(it, heroH, 1) }], 0, heroH);
+          if (it.fade) {
+            const [f0, f1] = it.fade;
+            add(it.el, [
+              { opacity: it.o, offset: 0 },
+              { opacity: it.o, offset: f0, easing: 'ease-in-out' },   // smooth()와 거의 같은 곡선
+              { opacity: 0, offset: f1 },
+              { opacity: 0, offset: 1 },
+            ], 0, heroH);
+          }
+        } else {
+          // d = clamp(y − s0, −vh, vh) → y ∈ [s0 − vh, s0 + vh]에서 선형
+          const a = Math.max(0, it.s0 - vh);
+          const b = Math.max(a + 1, it.s0 + vh);
+          const dAt = (y) => Math.min(Math.max(y - it.s0, -vh), vh);
+          add(it.el, [{ transform: transformAt(it, dAt(a), 0) }, { transform: transformAt(it, dAt(b), 0) }], a, b);
+        }
+      }
+    }
+  }
+
   function frame() {
     queued = false;
-    if (!enabled()) return;
+    if (!enabled() || useTimeline) return;
     const y = scrollY;
     if (bg && bgSpeed) bg.style.transform = `translate3d(0, ${(-bgSpeed * y).toFixed(1)}px, 0)`;
     for (const g of groups) {
@@ -134,7 +182,7 @@ export function initParallax() {
         if (d === g.last) continue;
         g.last = d;
         const moving = d < heroH;
-        for (const it of g.items) it.el.style.willChange = moving ? 'transform' : '';
+        if (!steady) for (const it of g.items) it.el.style.willChange = moving ? 'transform' : '';
       }
       for (const it of g.items) {
         if (!g.hero) d = Math.min(Math.max(y - it.s0, -vh), vh);
@@ -161,7 +209,7 @@ export function initParallax() {
       const g = groups.find((x) => x.scene.parentElement === e.target);
       if (!g || g.hero) continue;
       g.active = e.isIntersecting;
-      for (const it of g.items) it.el.style.willChange = g.active ? 'transform' : '';
+      if (!steady) for (const it of g.items) it.el.style.willChange = g.active ? 'transform' : '';
     }
     schedule();
   }, { rootMargin: '50% 0px' });
