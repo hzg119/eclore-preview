@@ -11,6 +11,7 @@
 //   nogrow    첫 화면 꽃이 퍼질 때 커지지 않게
 //   nospread  첫 화면 꽃이 퍼지지도 커지지도 않게 (층 속도만)
 //   half      층 속도 차이 절반 (덜 움직임)
+//   pin       원경을 화면 고정 기준으로 (손을 뗄 때 튀는 폭을 줄임, timeline과 같이 쓰면 이게 우선)
 // 인트로 끄기는 기존 ?nointro.
 
 const HERO = '.hero .scene';
@@ -34,5 +35,5 @@ export function applyPerfTest(list) {
   badge.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:99;padding:2px 6px;font:11px/1.4 monospace;color:#fff;background:rgba(0,0,0,.55);border-radius:3px;pointer-events:none';
   document.body.append(badge);
   const has = (k) => on.includes(k);
-  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half') };
+  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half'), pin: has('pin') };
 }

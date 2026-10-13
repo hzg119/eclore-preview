@@ -16,6 +16,8 @@
 //  - steady: 기본 경로 그대로, will-change를 켜고 끄지 않는다 (레이어를 다시 만들며 다시 그리는 비용 확인용).
 //  - nogrow: 첫 화면 오브제가 퍼질 때 커지지 않게 (크기가 바뀌면 사파리가 이미지를 다시 그리는지 확인용).
 //  - nospread: 퍼짐·커짐 없이 층 속도만. half: 층 속도 차이를 절반으로.
+//  - pin: 느린 층(속도 0.5 미만, 원경)을 화면 고정 기준으로. 위치는 같고, 스크롤 값이 화면보다 늦게 오는 순간
+//    튀는 폭이 (1 − 속도) → 속도 배로 준다 (원경 0.7 → 0.3). 배경 .bg가 흔들리지 않는 것과 같은 이유. JS 경로만.
 
 const FADE_SPAN = 0.18;
 const INNER = 0.76;      // 겹침 판정에 쓰는 오브제 상자 비율   // 첫 화면 진행도 기준: 글자와 겹치기 이만큼 전부터 투명해진다
@@ -25,7 +27,7 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
-export function initParallax({ timeline = false, steady = false, nogrow = false, nospread = false, half = false } = {}) {
+export function initParallax({ timeline = false, steady = false, nogrow = false, nospread = false, half = false, pin = false } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.documentElement;
   const hero = document.querySelector('.hero');
@@ -34,7 +36,7 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
   const bgSpeed = bg ? parseFloat(bg.dataset.speed) : 0;
   const scenes = [...document.querySelectorAll('.scene[data-anchor]')];
   if (!hero || !scenes.length) return;
-  const useTimeline = timeline && 'ScrollTimeline' in window;
+  const useTimeline = timeline && !pin && 'ScrollTimeline' in window;
   let anims = [];
 
   let groups = [];
@@ -54,6 +56,9 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
       it.el.style.transform = '';
       it.el.style.opacity = '';
       it.el.style.willChange = '';
+      it.el.style.position = '';
+      it.el.style.left = '';
+      it.el.style.top = '';
     }
     if (bg) {
       bg.style.transform = '';
@@ -96,7 +101,7 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
           const sx = (cx - tc[0]) * spread;
           const syv = (cy - tc[1]) * spread * vertical;
           const it = {
-            el, speed, grow, sx, sy: syv,
+            el, speed, grow, sx, sy: syv, cx, cy, pinned: pin && speed < 0.5,
             s0: cy - vh / 2,   // 섹션 오브제 기준점: 자기 중심이 화면 가운데 올 때
             rot: parseFloat(cs.getPropertyValue('--r')) || 0,
             o: parseFloat(cs.opacity) || 1,
@@ -128,6 +133,14 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
       bg.style.height = `${Math.ceil(Math.max(vh * 1.35, innerHeight + bgSpeed * maxScroll + 40))}px`;
     }
     lastHeight = root.scrollHeight;
+    // 화면 고정 기준: 다 잰 뒤에 바꾼다 (절대 배치라 다른 오브제 자리에 영향 없음). 문서 좌표의 중심을 left/top으로.
+    for (const g of groups) for (const it of g.items) {
+      if (!it.pinned) continue;
+      it.el.style.position = 'fixed';
+      it.el.style.left = `${it.cx.toFixed(1)}px`;
+      it.el.style.top = `${it.cy.toFixed(1)}px`;
+      it.el.style.willChange = 'transform';
+    }
     if (useTimeline) return attachTimeline();
     if (steady) for (const g of groups) for (const it of g.items) it.el.style.willChange = 'transform';
     for (const g of groups) observer.observe(g.scene.parentElement);
@@ -176,25 +189,25 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
     const y = scrollY;
     if (bg && bgSpeed) bg.style.transform = `translate3d(0, ${(-bgSpeed * y).toFixed(1)}px, 0)`;
     for (const g of groups) {
-      if (!g.active) continue;
-      let d;
       let p = 0;
+      let dh = 0;
+      let still = false;   // 첫 화면 오브제: 진행도가 그대로면 문서 기준 오브제는 건너뛴다
       if (g.hero) {
-        d = Math.min(Math.max(y, 0), heroH);   // 첫 화면을 지나면 멈춤
-        p = d / heroH;
-        if (d === g.last) continue;
-        g.last = d;
-        const moving = d < heroH;
-        if (!steady) for (const it of g.items) it.el.style.willChange = moving ? 'transform' : '';
+        dh = Math.min(Math.max(y, 0), heroH);   // 첫 화면을 지나면 멈춤
+        p = dh / heroH;
+        still = dh === g.last;
+        g.last = dh;
+        if (!still && !steady) for (const it of g.items) if (!it.pinned) it.el.style.willChange = dh < heroH ? 'transform' : '';
       }
       for (const it of g.items) {
-        if (!g.hero) d = Math.min(Math.max(y - it.s0, -vh), vh);
+        if (!it.pinned && (!g.active || still)) continue;   // 화면 고정 오브제는 스크롤마다 갱신
+        const d = g.hero ? dh : Math.min(Math.max(y - it.s0, -vh), vh);
         const tx = it.sx * p;
-        const ty = (1 - it.speed) * d + it.sy * p;
+        const ty = (1 - it.speed) * d + it.sy * p - (it.pinned ? y : 0);
         const s = 1 + it.grow * p;
         it.el.style.transform =
           `translate(-50%, -50%) translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotate(${it.rot}deg) scale(${s.toFixed(4)})`;
-        if (it.fade) it.el.style.opacity = (it.o * (1 - smooth(it.fade[0], it.fade[1], p))).toFixed(3);
+        if (it.fade && !still) it.el.style.opacity = (it.o * (1 - smooth(it.fade[0], it.fade[1], p))).toFixed(3);
       }
     }
   }
@@ -212,7 +225,7 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
       const g = groups.find((x) => x.scene.parentElement === e.target);
       if (!g || g.hero) continue;
       g.active = e.isIntersecting;
-      if (!steady) for (const it of g.items) it.el.style.willChange = g.active ? 'transform' : '';
+      if (!steady) for (const it of g.items) if (!it.pinned) it.el.style.willChange = g.active ? 'transform' : '';
     }
     schedule();
   }, { rootMargin: '50% 0px' });
