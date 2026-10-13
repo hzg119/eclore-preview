@@ -11,7 +11,6 @@
 //   nogrow    첫 화면 꽃이 퍼질 때 커지지 않게
 //   nospread  첫 화면 꽃이 퍼지지도 커지지도 않게 (층 속도만)
 //   half      층 속도 차이 절반 (덜 움직임)
-//   pin       원경을 화면 고정 기준으로 (손을 뗄 때 튀는 폭을 줄임, timeline과 같이 쓰면 이게 우선)
 // 인트로 끄기는 기존 ?nointro.
 
 const HERO = '.hero .scene';
@@ -34,6 +33,10 @@ export function applyPerfTest(list) {
   badge.textContent = `perf: ${on.join(', ') || '-'}${tlNote}${/[?&]nointro\b/.test(location.search) ? ' + nointro' : ''}`;
   badge.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:99;padding:2px 6px;font:11px/1.4 monospace;color:#fff;background:rgba(0,0,0,.55);border-radius:3px;pointer-events:none';
   document.body.append(badge);
+  // 패럴랙스가 위치를 다시 잰 횟수 (툴바가 접히고 펴질 때 늘어나는지 실기기에서 확인)
+  const label = badge.textContent;
+  let n = 0;
+  addEventListener('eclore:remeasure', () => { n += 1; badge.textContent = `${label} · 측정 ${n}`; });
   const has = (k) => on.includes(k);
-  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half'), pin: has('pin') };
+  return { still: has('still'), timeline: has('timeline'), steady: has('steady'), nogrow: has('nogrow'), nospread: has('nospread'), half: has('half') };
 }

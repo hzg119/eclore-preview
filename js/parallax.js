@@ -7,6 +7,8 @@
 //  - 섹션 오브제: 그 오브제가 화면 가운데 올 때 이동 0 → scene.json에 놓은 자리가 '가운데 왔을 때의 모습'.
 //  - 배경(고정 div): r 속도로 아주 천천히 올라간다.
 // 위치는 로드·폭 변화·페이지 높이 변화(폰트 교체, FAQ 열고 닫기) 때만 잰다. 매 프레임 레이아웃을 읽지 않는다.
+// 다시 잴 때 오브제를 원래 자리로 되돌리지 않는다: transform과 무관한 값(계산된 left·top·크기)으로 재고 바로 새 위치를 넣는다.
+// (되돌렸다가 다음 프레임에 놓으면 그 한 프레임 동안 꽃이 순간이동한다. 인앱 툴바가 접히고 펴질 때마다 보였다.)
 // transform만 쓴다. prefers-reduced-motion이거나 편집기(?edit)가 켜지면 멈추고 원래 자리로.
 //
 // 실험 (미리보기 ?perf=timeline·steady, perf-test.js가 켠다. 정식 빌드는 기본 경로):
@@ -16,8 +18,6 @@
 //  - steady: 기본 경로 그대로, will-change를 켜고 끄지 않는다 (레이어를 다시 만들며 다시 그리는 비용 확인용).
 //  - nogrow: 첫 화면 오브제가 퍼질 때 커지지 않게 (크기가 바뀌면 사파리가 이미지를 다시 그리는지 확인용).
 //  - nospread: 퍼짐·커짐 없이 층 속도만. half: 층 속도 차이를 절반으로.
-//  - pin: 느린 층(속도 0.5 미만, 원경)을 화면 고정 기준으로. 위치는 같고, 스크롤 값이 화면보다 늦게 오는 순간
-//    튀는 폭이 (1 − 속도) → 속도 배로 준다 (원경 0.7 → 0.3). 배경 .bg가 흔들리지 않는 것과 같은 이유. JS 경로만.
 
 const FADE_SPAN = 0.18;
 const INNER = 0.76;      // 겹침 판정에 쓰는 오브제 상자 비율   // 첫 화면 진행도 기준: 글자와 겹치기 이만큼 전부터 투명해진다
@@ -27,7 +27,7 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
-export function initParallax({ timeline = false, steady = false, nogrow = false, nospread = false, half = false, pin = false } = {}) {
+export function initParallax({ timeline = false, steady = false, nogrow = false, nospread = false, half = false } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.documentElement;
   const hero = document.querySelector('.hero');
@@ -36,8 +36,9 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
   const bgSpeed = bg ? parseFloat(bg.dataset.speed) : 0;
   const scenes = [...document.querySelectorAll('.scene[data-anchor]')];
   if (!hero || !scenes.length) return;
-  const useTimeline = timeline && !pin && 'ScrollTimeline' in window;
+  const useTimeline = timeline && 'ScrollTimeline' in window;
   let anims = [];
+  let retiring = [];   // 다시 잰 뒤 새 애니메이션이 준비되면 지울 옛 애니메이션
 
   let groups = [];
   let heroH = 1;
@@ -50,15 +51,13 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
   const enabled = () => !reduce.matches && !paused;
 
   function reset() {
-    for (const a of anims) a.cancel();
+    for (const a of [...anims, ...retiring]) a.cancel();
     anims = [];
+    retiring = [];
     for (const g of groups) for (const it of g.items) {
       it.el.style.transform = '';
       it.el.style.opacity = '';
       it.el.style.willChange = '';
-      it.el.style.position = '';
-      it.el.style.left = '';
-      it.el.style.top = '';
     }
     if (bg) {
       bg.style.transform = '';
@@ -67,8 +66,7 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
   }
 
   function measure() {
-    reset();
-    if (!enabled()) return;
+    if (!enabled()) return reset();
     const lock = parseFloat(getComputedStyle(root).getPropertyValue('--vhl'));
     vh = lock > 2 ? lock * 100 : innerHeight;   // viewport-lock.js가 고정한 높이 기준
     heroH = hero.offsetHeight || 1;
@@ -83,17 +81,25 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
       .map((r) => [r.left - 8, r.top + sy - 8, r.right + 8, r.bottom + sy + 8]);
     const hits = (b) => text.some((r) => b[0] < r[2] && b[2] > r[0] && b[1] < r[3] && b[3] > r[1]);
 
+    const prev = new Map(groups.map((g) => [g.scene, g]));
     groups = scenes.map((scene) => {
-      const anchor = scene.parentElement;
       const isHero = scene.dataset.anchor === 'hero';
+      const sr = scene.getBoundingClientRect();   // scene 자체는 움직이지 않는다
       const vertical = parseFloat(scene.dataset.spreadVertical || '1');
       const items = [...scene.querySelectorAll('.obj')]
         .filter((el) => el.offsetWidth)   // 이 구도에서 숨긴 오브제 제외
         .map((el) => {
-          const r = el.getBoundingClientRect();
-          const cx = r.left + r.width / 2;
-          const cy = r.top + sy + r.height / 2;
+          // 중심 = left·top (translate(-50%, -50%)로 가운데 맞춤). 지금 걸린 transform·애니메이션과 무관하다.
           const cs = getComputedStyle(el);
+          const cx = sr.left + parseFloat(cs.left);
+          const cy = sr.top + sy + parseFloat(cs.top);
+          const rot = parseFloat(cs.getPropertyValue('--r')) || 0;
+          const w = parseFloat(cs.width);
+          const h = parseFloat(cs.height);
+          const ra = (rot * Math.PI) / 180;
+          const bw = w * Math.abs(Math.cos(ra)) + h * Math.abs(Math.sin(ra));   // 돌린 상자
+          const bh = w * Math.abs(Math.sin(ra)) + h * Math.abs(Math.cos(ra));
+          const o = parseFloat(cs.getPropertyValue('--o'));
           const r0 = parseFloat(el.dataset.speed || '1');
           const speed = half ? 1 - (1 - r0) / 2 : r0;
           const spread = nospread ? 0 : parseFloat(el.dataset.spread || '0');
@@ -101,10 +107,10 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
           const sx = (cx - tc[0]) * spread;
           const syv = (cy - tc[1]) * spread * vertical;
           const it = {
-            el, speed, grow, sx, sy: syv, cx, cy, pinned: pin && speed < 0.5,
+            el, speed, grow, sx, sy: syv,
             s0: cy - vh / 2,   // 섹션 오브제 기준점: 자기 중심이 화면 가운데 올 때
-            rot: parseFloat(cs.getPropertyValue('--r')) || 0,
-            o: parseFloat(cs.opacity) || 1,
+            rot,
+            o: Number.isFinite(o) ? o : 1,
             fade: null,
           };
           if (isHero) {
@@ -115,8 +121,8 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
               const fx = cx + sx * p;
               const fy = cy + syv * p + (1 - speed) * heroH * p;
               // 둥근 방울·꽃잎의 투명한 모서리는 빼고 (상자 안쪽 76%)
-              const hw = (r.width * s * INNER) / 2;
-              const hh = (r.height * s * INNER) / 2;
+              const hw = (bw * s * INNER) / 2;
+              const hh = (bh * s * INNER) / 2;
               if (hits([fx - hw, fy - hh, fx + hw, fy + hh])) {
                 it.fade = [Math.max(0, p - FADE_SPAN), Math.max(0.001, p)];
                 break;
@@ -125,7 +131,7 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
           }
           return it;
         });
-      return { scene, items, hero: isHero, active: isHero, last: null };
+      return { scene, items, hero: isHero, active: isHero || !!prev.get(scene)?.active, last: null };
     });
 
     if (bg && bgSpeed) {
@@ -133,18 +139,11 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
       bg.style.height = `${Math.ceil(Math.max(vh * 1.35, innerHeight + bgSpeed * maxScroll + 40))}px`;
     }
     lastHeight = root.scrollHeight;
-    // 화면 고정 기준: 다 잰 뒤에 바꾼다 (절대 배치라 다른 오브제 자리에 영향 없음). 문서 좌표의 중심을 left/top으로.
-    for (const g of groups) for (const it of g.items) {
-      if (!it.pinned) continue;
-      it.el.style.position = 'fixed';
-      it.el.style.left = `${it.cx.toFixed(1)}px`;
-      it.el.style.top = `${it.cy.toFixed(1)}px`;
-      it.el.style.willChange = 'transform';
-    }
+    dispatchEvent(new CustomEvent('eclore:remeasure'));   // 미리보기 perf 표시용
     if (useTimeline) return attachTimeline();
     if (steady) for (const g of groups) for (const it of g.items) it.el.style.willChange = 'transform';
     for (const g of groups) observer.observe(g.scene.parentElement);
-    schedule();
+    frame();   // 다음 프레임을 기다리지 않고 바로 (그 사이 옛 위치가 한 프레임 보이지 않게)
   }
 
   const transformAt = (it, d, p) =>
@@ -152,6 +151,10 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
 
   // frame()과 같은 움직임을 스크롤 px 구간 [a, b]의 선형 애니메이션으로 (구간 밖은 끝값 유지)
   function attachTimeline() {
+    // 옛 애니메이션은 새 것이 준비된 뒤에 지운다 (새 것은 첫 프레임에 아직 적용 전일 수 있다)
+    const old = anims;
+    retiring.push(...old);
+    anims = [];
     const tl = new ScrollTimeline({ source: root, axis: 'block' });
     const add = (el, kf, a, b) =>
       anims.push(el.animate(kf, { timeline: tl, rangeStart: `${a}px`, rangeEnd: `${b}px`, fill: 'both', easing: 'linear' }));
@@ -181,6 +184,10 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
         }
       }
     }
+    Promise.all(anims.map((a) => a.ready)).then(() => {
+      for (const a of old) a.cancel();
+      retiring = retiring.filter((a) => !old.includes(a));
+    });
   }
 
   function frame() {
@@ -191,19 +198,19 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
     for (const g of groups) {
       let p = 0;
       let dh = 0;
-      let still = false;   // 첫 화면 오브제: 진행도가 그대로면 문서 기준 오브제는 건너뛴다
+      let still = false;   // 첫 화면 오브제: 진행도가 그대로면 건너뛴다
       if (g.hero) {
         dh = Math.min(Math.max(y, 0), heroH);   // 첫 화면을 지나면 멈춤
         p = dh / heroH;
         still = dh === g.last;
         g.last = dh;
-        if (!still && !steady) for (const it of g.items) if (!it.pinned) it.el.style.willChange = dh < heroH ? 'transform' : '';
+        if (!still && !steady) for (const it of g.items) it.el.style.willChange = dh < heroH ? 'transform' : '';
       }
       for (const it of g.items) {
-        if (!it.pinned && (!g.active || still)) continue;   // 화면 고정 오브제는 스크롤마다 갱신
+        if (!g.active || still) continue;
         const d = g.hero ? dh : Math.min(Math.max(y - it.s0, -vh), vh);
         const tx = it.sx * p;
-        const ty = (1 - it.speed) * d + it.sy * p - (it.pinned ? y : 0);
+        const ty = (1 - it.speed) * d + it.sy * p;
         const s = 1 + it.grow * p;
         it.el.style.transform =
           `translate(-50%, -50%) translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) rotate(${it.rot}deg) scale(${s.toFixed(4)})`;
@@ -225,7 +232,7 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
       const g = groups.find((x) => x.scene.parentElement === e.target);
       if (!g || g.hero) continue;
       g.active = e.isIntersecting;
-      if (!steady) for (const it of g.items) if (!it.pinned) it.el.style.willChange = g.active ? 'transform' : '';
+      if (!steady) for (const it of g.items) it.el.style.willChange = g.active ? 'transform' : '';
     }
     schedule();
   }, { rootMargin: '50% 0px' });
@@ -249,8 +256,9 @@ export function initParallax({ timeline = false, steady = false, nogrow = false,
     }
   });
   // 페이지 높이 변화 (폰트 교체, FAQ 열고 닫기 등) → 섹션 기준점 다시 재기
+  // 1~2px은 무시: 인앱 툴바가 접히고 펴질 때 반올림으로 높이가 1px씩 흔들린다
   new ResizeObserver(() => {
-    if (root.scrollHeight !== lastHeight) remeasure();
+    if (Math.abs(root.scrollHeight - lastHeight) > 2) remeasure();
   }).observe(document.body);
   if (document.fonts) document.fonts.ready.then(remeasure);
   reduce.addEventListener?.('change', remeasure);
