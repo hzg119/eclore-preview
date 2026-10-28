@@ -29,7 +29,7 @@
   document.documentElement.classList.add('intro-wait');
 })();
 </script>
-<link rel="stylesheet" href="./css/site.css?v=c7acc0f2">
+<link rel="stylesheet" href="./css/site.css?v=fff39090">
 <script type="module" src="./js/main.js?v=a6cdd872"></script>
 </head>
 <body class="mode-full">
@@ -136,12 +136,11 @@
       <summary class="btn-ghost w-r is-todo">이벤트 응모하기</summary>
       <form class="veil" action="#" method="post" data-endpoint="">
         <label class="field"><span class="field__label">2026 피앗 정기공연에 함께 오고 싶은 사람이 있나요? 그 이유도 적어주세요.</span>
-          <textarea name="story" rows="5" maxlength="1000" required></textarea></label>
+          <textarea name="story" rows="5" maxlength="1000" required placeholder="예) 늘 응원해 주는 동생이요. 올해는 꼭 제 무대를 직접 보여 주고 싶어요."></textarea></label>
         <label class="field"><span class="field__label">이름 (예매자명과 같게)</span>
-          <input name="name" autocomplete="name" maxlength="40" required></label>
+          <input name="name" autocomplete="name" maxlength="40" required placeholder="홍길동"></label>
         <label class="field"><span class="field__label">연락처 (예매자 정보와 같게)</span>
-          <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" pattern="01[0-9]-?[0-9]{3,4}-?[0-9]{4}" required aria-describedby="phone-hint">
-          <small class="field__hint" id="phone-hint">01012345678처럼 숫자만 적어 주세요.</small></label>
+          <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" pattern="01[0-9]-?[0-9]{3,4}-?[0-9]{4}" required placeholder="01012345678"></label>
         <div class="privacy">
           <dl>
             <div><dt class="w-sb">수집 항목</dt><dd>이름, 연락처, 사연</dd></div>
@@ -161,49 +160,94 @@
   <section class="sec directions" id="directions" aria-labelledby="directions-h">
     <h2 id="directions-h" class="w-r">오시는 길</h2>
     <p class="directions__venue">서강대학교 이냐시오관 소강당</p>
-    <svg class="map" viewBox="0 0 360 272" role="img" aria-labelledby="map-t">
-<title id="map-t">서강대학교 캠퍼스 약도. 이냐시오관은 정문 가까이에 있고, 정문은 신촌역·서강대역, 남문은 대흥역, 후문은 이대역에서 가깝습니다.</title>
+    <svg class="map" viewBox="0 -50 860 530" role="img" aria-labelledby="map-t">
+<title id="map-t">서강대학교 캠퍼스 약도. 이냐시오관(이냐시오 성당)은 정문 가까이에 있고, 정문은 2호선 신촌역·경의중앙선 서강대역, 남문은 6호선 대흥역, 후문은 2호선 이대역·6호선 대흥역에서 이어집니다.</title>
+<rect class="map__land" x="0" y="-50" width="860" height="530"/>
+
 <g class="map__road">
-<path d="M0 52 L360 40"/><path d="M74 0 L86 272"/><path d="M314 0 L322 272"/><path d="M0 238 L360 202"/>
+<path d="M-10 36 L235 112"/>
+<path d="M180 108 L870 84"/>
+<path class="map__road--s" d="M-10 214 L235 124"/>
+<path d="M232 -60 L238 120 L248 260 L264 412 L282 490"/>
+<path d="M-10 412 L265 413"/>
+<path d="M255 304 L870 412"/>
+<path class="map__road--s" d="M283 414 C420 414 560 360 657 278"/>
+<path class="map__road--s" d="M512 -60 L512 84"/>
+<path class="map__road--s" d="M700 -60 L702 86"/>
+<path d="M784 -60 L786 310 L726 490"/>
 </g>
-<ellipse class="map__campus" cx="200" cy="140" rx="92" ry="70"/>
-<text class="map__campus-label" x="214" y="164" text-anchor="middle">서강대학교</text>
+
+<g class="map__ways">
+<text class="map__way" text-anchor="middle"><tspan x="214" y="-34">연</tspan><tspan x="214" y="-15">세</tspan><tspan x="214" y="4">대</tspan><tspan x="214" y="23">방</tspan><tspan x="214" y="42">면</tspan></text>
+<text class="map__way" text-anchor="middle"><tspan x="494" y="-34">신</tspan><tspan x="494" y="-15">촌</tspan><tspan x="494" y="4">기</tspan><tspan x="494" y="23">차</tspan><tspan x="494" y="42">역</tspan><tspan x="494" y="61">방</tspan><tspan x="494" y="80">면</tspan></text>
+<text class="map__way" text-anchor="middle"><tspan x="682" y="-34">이</tspan><tspan x="682" y="-15">화</tspan><tspan x="682" y="4">여</tspan><tspan x="682" y="23">대</tspan><tspan x="682" y="42">방</tspan><tspan x="682" y="61">면</tspan></text>
+<text class="map__way" x="852" y="80" text-anchor="end">시청 방면</text>
+<text class="map__way" x="10" y="404">마포세무서 방면</text>
+<text class="map__way" transform="translate(16 205) rotate(-20)">서강대교 방면</text>
+</g>
+
+<g class="map__campus">
+<circle class="map__campus-ring" cx="468" cy="228" r="62"/>
+<circle cx="468" cy="228" r="53"/>
+<path class="map__flag" d="M456 188 v28 M461 191 h18 l-5 6 l5 6 h-18 z"/>
+<text x="468" y="240" text-anchor="middle">서강대학교</text>
+<text x="468" y="264" text-anchor="middle">캠퍼스</text>
+</g>
+
+<g class="map__places">
+<rect class="map__dot" x="185" y="53" width="6" height="6"/><text class="map__place" x="180" y="47" text-anchor="end">현대백화점 신촌점</text>
+<rect class="map__dot" x="193" y="109" width="6" height="6"/><text class="map__place" x="186" y="104" text-anchor="end">이랜드복합관 신촌점</text>
+<rect class="map__dot" x="304" y="111" width="6" height="6"/><text class="map__place" x="316" y="121" text-anchor="start">우리은행</text>
+<rect class="map__dot" x="373" y="197" width="6" height="6"/><text class="map__place" x="386" y="207" text-anchor="start">본관</text>
+<rect class="map__dot" x="32" y="213" width="6" height="6"/><text class="map__place" x="8" y="238" text-anchor="start">신촌연세병원</text>
+<rect class="map__dot" x="273" y="301" width="6" height="6"/><text class="map__place" x="286" y="318" text-anchor="start">롯데하이마트 서강점</text>
+<rect class="map__dot" x="281" y="334" width="6" height="6"/><text class="map__place" x="280" y="364" text-anchor="start">벨라르미노학사(기숙사)</text>
+<rect class="map__dot" x="238" y="377" width="6" height="6"/><text class="map__place" x="230" y="387" text-anchor="end">한국경영자총협회</text>
+<rect class="map__dot" x="425" y="427" width="6" height="6"/><text class="map__place" x="438" y="437" text-anchor="start">용강초등학교</text>
+<rect class="map__dot" x="537" y="64" width="6" height="6"/><text class="map__place" x="550" y="74" text-anchor="start">신촌우체국</text>
+<rect class="map__dot" x="545" y="122" width="6" height="6"/><text class="map__place" x="558" y="132" text-anchor="start">대흥동주민센터</text>
+<rect class="map__dot" x="654" y="313" width="6" height="6"/><text class="map__place" x="667" y="323" text-anchor="start">숭문중학교</text>
+<rect class="map__dot" x="734" y="365" width="6" height="6"/><text class="map__place" x="713" y="356" text-anchor="middle">숭문고등학교</text>
+<rect class="map__dot" x="702" y="405" width="6" height="6"/><text class="map__place" x="690" y="434" text-anchor="middle">마포아트센터</text>
+</g>
+
 
 <g class="map__route" fill="none">
-<path class="map__l2" d="M77 62 L82 108 L97 114"/>
-<path class="map__lg" d="M43 124 L97 118"/>
-<path class="map__l6" d="M84 215 L88 186 L108 181"/>
-<path class="map__l2" d="M315 55 L318 140 L304 162"/>
+<path class="map__l2" d="M235 131 L243 203 L265 203"/>
+<path class="map__lg" d="M181 213 L265 213"/>
+<path class="map__l6" d="M262 393 L255 276 L265 276"/>
+<path class="map__l6" d="M286 414 C420 414 560 360 660 282 L637 282"/>
+<path class="map__l2" d="M702 108 L702 198 L662 268 L637 268"/>
+<path class="map__walk" d="M335 209 L346 209 L371 184"/>
 </g>
-<path class="map__walk" d="M114 116 L150 101"/>
 
 <g class="map__gate">
-<rect x="97" y="107" width="34" height="18" rx="9"/><text x="114" y="120" text-anchor="middle">정문</text>
-<rect x="108" y="171" width="34" height="18" rx="9"/><text x="125" y="184" text-anchor="middle">남문</text>
-<rect x="270" y="155" width="34" height="18" rx="9"/><text x="287" y="168" text-anchor="middle">후문</text>
+<rect x="265" y="193" width="70" height="32" rx="16"/><text x="300" y="216" text-anchor="middle">정문</text>
+<rect x="265" y="260" width="70" height="32" rx="16"/><text x="300" y="283" text-anchor="middle">남문</text>
+<rect x="567" y="259" width="70" height="32" rx="16"/><text x="602" y="282" text-anchor="middle">후문</text>
 </g>
 
 <g class="map__venue">
-<circle cx="154" cy="99" r="8"/><circle class="map__venue-dot" cx="154" cy="99" r="3"/>
-<text class="w-r" x="167" y="97">이냐시오관</text>
-<text class="map__venue-sub" x="167" y="114">소강당</text>
+<rect x="368" y="167" width="16" height="16"/>
+<text class="w-r" x="378" y="156" text-anchor="middle">이냐시오관</text>
+<text class="map__venue-sub" x="360" y="184" text-anchor="end">소강당</text>
 </g>
 
-<g class="map__station">
-<circle class="map__l2" cx="77" cy="49" r="13"/><text class="map__no" x="77" y="54" text-anchor="middle">2</text>
-<text class="map__name" x="58" y="34" text-anchor="end">신촌역</text>
-<circle class="map__lg" cx="30" cy="124" r="13"/><text class="map__no map__no--s" x="30" y="128" text-anchor="middle">경의</text>
-<text class="map__name" x="30" y="155" text-anchor="middle">서강대역</text>
-<circle class="map__l6" cx="84" cy="228" r="13"/><text class="map__no" x="84" y="233" text-anchor="middle">6</text>
-<text class="map__name" x="64" y="258" text-anchor="end">대흥역</text>
-<circle class="map__l2" cx="315" cy="42" r="13"/><text class="map__no" x="315" y="47" text-anchor="middle">2</text>
-<text class="map__name" x="296" y="24" text-anchor="end">이대역</text>
+<g class="map__stations">
+<circle class="map__st map__l2" cx="233" cy="111" r="20"/><text class="map__no" x="233" y="119" text-anchor="middle">2</text>
+<text class="map__name w-sb map__l2" x="258" y="84" text-anchor="start">신촌</text>
+<circle class="map__st map__lg" cx="161" cy="213" r="20"/><text class="map__no map__no--s" x="161" y="221" text-anchor="middle">경의</text>
+<text class="map__name w-sb map__lg" x="161" y="263" text-anchor="middle">서강대</text>
+<circle class="map__st map__l6" cx="266" cy="413" r="20"/><text class="map__no" x="266" y="421" text-anchor="middle">6</text>
+<text class="map__name w-sb map__l6" x="243" y="462" text-anchor="middle">대흥</text>
+<circle class="map__st map__l2" cx="702" cy="88" r="20"/><text class="map__no" x="702" y="96" text-anchor="middle">2</text>
+<text class="map__name w-sb map__l2" x="730" y="128" text-anchor="start">이대</text>
 </g>
 </svg>
     <ul class="routes">
       <li><span class="routes__gate w-sb">정문</span><span>2호선 신촌역 · 경의중앙선 서강대역<br><span class="routes__note">공연장과 가장 가까워요</span></span></li>
       <li><span class="routes__gate w-sb">남문</span><span>6호선 대흥역</span></li>
-      <li><span class="routes__gate w-sb">후문</span><span>2호선 이대역</span></li>
+      <li><span class="routes__gate w-sb">후문</span><span>2호선 이대역 · 6호선 대흥역</span></li>
     </ul>
 <p class="note">공연장인 소강당은 이냐시오관(이냐시오 성당) 안에 있어요.</p>    <p class="map-links"><a class="btn-ghost w-r" href="https://map.naver.com/p/search/%EC%84%9C%EA%B0%95%EB%8C%80%ED%95%99%EA%B5%90%20%EC%9D%B4%EB%83%90%EC%8B%9C%EC%98%A4%EA%B4%80" target="_blank" rel="noopener">네이버 지도</a><a class="btn-ghost w-r" href="https://map.kakao.com/link/search/%EC%84%9C%EA%B0%95%EB%8C%80%ED%95%99%EA%B5%90%20%EC%9D%B4%EB%83%90%EC%8B%9C%EC%98%A4%EA%B4%80" target="_blank" rel="noopener">카카오맵</a></p>
   </section>
