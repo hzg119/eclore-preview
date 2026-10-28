@@ -9,7 +9,7 @@ const params = new URLSearchParams(location.search);
 
 function start(opts = {}) {
   lockViewportHeight();   // 먼저: 패럴랙스가 고정 높이를 기준으로 잰다
-  if (!opts.still) initParallax(opts);
+  if (!opts.still) initParallax();
   initIntro();            // head 인라인 스크립트가 "인트로 대기"를 붙인 경우만 동작
   initStickyCta();
 }
