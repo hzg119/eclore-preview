@@ -1,8 +1,9 @@
-// 진입점. Phase별 모듈을 여기서 붙인다 (track.js P4, parallax.js P2, intro.js P3).
+// 진입점. Phase별 모듈을 여기서 붙인다 (track.js P4, parallax.js P2, intro.js P3, form.js P4).
 import { lockViewportHeight } from './viewport-lock.js';
 import { initParallax } from './parallax.js';
 import { initIntro } from './intro.js';
 import { initStickyCta } from './sticky-cta.js';
+import { initEventForm } from './form.js';
 
 const editor = document.documentElement.hasAttribute('data-editor');
 const params = new URLSearchParams(location.search);
@@ -12,6 +13,7 @@ function start(opts = {}) {
   if (!opts.still) initParallax();
   initIntro();            // head 인라인 스크립트가 "인트로 대기"를 붙인 경우만 동작
   initStickyCta();
+  initEventForm();
 }
 
 // 실기기 성능 비교 스위치 (?perf=…): --editor 빌드(미리보기·dev 서버)에만 파일이 있다

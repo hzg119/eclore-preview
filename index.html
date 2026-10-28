@@ -29,8 +29,8 @@
   document.documentElement.classList.add('intro-wait');
 })();
 </script>
-<link rel="stylesheet" href="./css/site.css?v=8c27564f">
-<script type="module" src="./js/main.js?v=7659c3f2"></script>
+<link rel="stylesheet" href="./css/site.css?v=c7acc0f2">
+<script type="module" src="./js/main.js?v=a6cdd872"></script>
 </head>
 <body class="mode-full">
 <div class="bg" aria-hidden="true" data-speed="0.1"><img src="./img/bg-640.webp" srcset="./img/bg-640.webp 640w, ./img/bg-1000.webp 1000w" sizes="50vw" width="2400" height="3473" alt=""></div>
@@ -131,9 +131,81 @@
       <div><dt class="w-sb">대상</dt><dd>사전예매를 마친 분 (피앗 현 단원 제외)</dd></div>
       <div><dt class="w-sb">기간</dt><dd>10월 29일(목) ~ 11월 21일(토)</dd></div>
       <div><dt class="w-sb">발표</dt><dd>11월 23일(월), 연락처로 개별 안내 + 인스타그램 공지</dd></div>
-      <div><dt class="w-sb">당첨 인원</dt><dd><span class="todo">TODO: 당첨 인원 (이벤트 예산 확정 후)</span></dd></div>
     </dl>
-<p class="note">소개되는 사연은 익명으로 처리돼요.</p>    <p class="event-cta"><a class="btn-ghost w-r is-todo" href="#" aria-disabled="true">이벤트 응모하기</a></p>
+<p class="note">소개되는 사연은 익명으로 처리돼요.</p>    <details class="event-form" id="event-form">
+      <summary class="btn-ghost w-r is-todo">이벤트 응모하기</summary>
+      <form class="veil" action="#" method="post" data-endpoint="">
+        <label class="field"><span class="field__label">2026 피앗 정기공연에 함께 오고 싶은 사람이 있나요? 그 이유도 적어주세요.</span>
+          <textarea name="story" rows="5" maxlength="1000" required></textarea></label>
+        <label class="field"><span class="field__label">이름 (예매자명과 같게)</span>
+          <input name="name" autocomplete="name" maxlength="40" required></label>
+        <label class="field"><span class="field__label">연락처 (예매자 정보와 같게)</span>
+          <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" pattern="01[0-9]-?[0-9]{3,4}-?[0-9]{4}" required aria-describedby="phone-hint">
+          <small class="field__hint" id="phone-hint">01012345678처럼 숫자만 적어 주세요.</small></label>
+        <div class="privacy">
+          <dl>
+            <div><dt class="w-sb">수집 항목</dt><dd>이름, 연락처, 사연</dd></div>
+            <div><dt class="w-sb">이용 목적</dt><dd>예매 명단 대조, 당첨 안내, 익명 사연 소개</dd></div>
+            <div><dt class="w-sb">보관 기간</dt><dd>공연 종료 후 30일 이내 파기 (2026년 12월 28일까지)</dd></div>
+          </dl>
+<p>동의하지 않을 수 있으며, 이 경우 이벤트 응모가 제한됩니다.</p>        </div>
+        <label class="consent"><input type="checkbox" name="consent" value="yes" required> <span>개인정보 수집·이용에 동의합니다.</span></label>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn-book w-r" type="submit">응모하기</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+      <template id="event-msgs"><span data-k="sending">보내는 중이에요…</span><span data-k="done">응모가 접수됐어요. 고맙습니다!</span><span data-k="closed">응모 기간이 끝났어요.</span><span data-k="error">보내지 못했어요. 잠시 뒤 다시 눌러 주세요. 계속 안 되면 인스타그램 DM으로 알려 주세요.</span></template>
+    </details>
+  </section>
+
+  <section class="sec directions" id="directions" aria-labelledby="directions-h">
+    <h2 id="directions-h" class="w-r">오시는 길</h2>
+    <p class="directions__venue">서강대학교 이냐시오관 소강당</p>
+    <svg class="map" viewBox="0 0 360 272" role="img" aria-labelledby="map-t">
+<title id="map-t">서강대학교 캠퍼스 약도. 이냐시오관은 정문 가까이에 있고, 정문은 신촌역·서강대역, 남문은 대흥역, 후문은 이대역에서 가깝습니다.</title>
+<g class="map__road">
+<path d="M0 52 L360 40"/><path d="M74 0 L86 272"/><path d="M314 0 L322 272"/><path d="M0 238 L360 202"/>
+</g>
+<ellipse class="map__campus" cx="200" cy="140" rx="92" ry="70"/>
+<text class="map__campus-label" x="214" y="164" text-anchor="middle">서강대학교</text>
+
+<g class="map__route" fill="none">
+<path class="map__l2" d="M77 62 L82 108 L97 114"/>
+<path class="map__lg" d="M43 124 L97 118"/>
+<path class="map__l6" d="M84 215 L88 186 L108 181"/>
+<path class="map__l2" d="M315 55 L318 140 L304 162"/>
+</g>
+<path class="map__walk" d="M114 116 L150 101"/>
+
+<g class="map__gate">
+<rect x="97" y="107" width="34" height="18" rx="9"/><text x="114" y="120" text-anchor="middle">정문</text>
+<rect x="108" y="171" width="34" height="18" rx="9"/><text x="125" y="184" text-anchor="middle">남문</text>
+<rect x="270" y="155" width="34" height="18" rx="9"/><text x="287" y="168" text-anchor="middle">후문</text>
+</g>
+
+<g class="map__venue">
+<circle cx="154" cy="99" r="8"/><circle class="map__venue-dot" cx="154" cy="99" r="3"/>
+<text class="w-r" x="167" y="97">이냐시오관</text>
+<text class="map__venue-sub" x="167" y="114">소강당</text>
+</g>
+
+<g class="map__station">
+<circle class="map__l2" cx="77" cy="49" r="13"/><text class="map__no" x="77" y="54" text-anchor="middle">2</text>
+<text class="map__name" x="58" y="34" text-anchor="end">신촌역</text>
+<circle class="map__lg" cx="30" cy="124" r="13"/><text class="map__no map__no--s" x="30" y="128" text-anchor="middle">경의</text>
+<text class="map__name" x="30" y="155" text-anchor="middle">서강대역</text>
+<circle class="map__l6" cx="84" cy="228" r="13"/><text class="map__no" x="84" y="233" text-anchor="middle">6</text>
+<text class="map__name" x="64" y="258" text-anchor="end">대흥역</text>
+<circle class="map__l2" cx="315" cy="42" r="13"/><text class="map__no" x="315" y="47" text-anchor="middle">2</text>
+<text class="map__name" x="296" y="24" text-anchor="end">이대역</text>
+</g>
+</svg>
+    <ul class="routes">
+      <li><span class="routes__gate w-sb">정문</span><span>2호선 신촌역 · 경의중앙선 서강대역<br><span class="routes__note">공연장과 가장 가까워요</span></span></li>
+      <li><span class="routes__gate w-sb">남문</span><span>6호선 대흥역</span></li>
+      <li><span class="routes__gate w-sb">후문</span><span>2호선 이대역</span></li>
+    </ul>
+<p class="note">공연장인 소강당은 이냐시오관(이냐시오 성당) 안에 있어요.</p>    <p class="map-links"><a class="btn-ghost w-r" href="https://map.naver.com/p/search/%EC%84%9C%EA%B0%95%EB%8C%80%ED%95%99%EA%B5%90%20%EC%9D%B4%EB%83%90%EC%8B%9C%EC%98%A4%EA%B4%80" target="_blank" rel="noopener">네이버 지도</a><a class="btn-ghost w-r" href="https://map.kakao.com/link/search/%EC%84%9C%EA%B0%95%EB%8C%80%ED%95%99%EA%B5%90%20%EC%9D%B4%EB%83%90%EC%8B%9C%EC%98%A4%EA%B4%80" target="_blank" rel="noopener">카카오맵</a></p>
   </section>
 
   <section class="sec faq" id="faq" aria-labelledby="faq-h">
@@ -143,7 +215,6 @@
       <details><summary>공연은 얼마나 걸리나요?</summary><div class="faq__a"><p>약 90분동안 진행됩니다. (인터미션 10분 포함)</p></div></details>
       <details><summary>티켓은 얼마인가요?</summary><div class="faq__a"><p>사전 예매 시 6,000원, 현장 예매 시 8,000원이에요.</p></div></details>
       <details><summary>좌석은 어떻게 앉나요?</summary><div class="faq__a"><p>정해진 좌석 없이 자유롭게 앉으시면 돼요. 공연 당일 받으신 입장권을 지니고 입장해 주세요.</p></div></details>
-      <details><summary>어떻게 찾아가나요?</summary><div class="faq__a"><p><span class="todo">TODO: 가까운 역·출구, 정문에서 이냐시오관까지 동선</span></p></div></details>
       <details><summary>주차할 수 있나요?</summary><div class="faq__a"><p>공연 당일 티켓박스에서 차량번호를 적어 주시면, 주차 할인권을 온라인으로 보내 드려요.</p></div></details>
       <details><summary>늦게 도착하면 들어갈 수 있나요?</summary><div class="faq__a"><p>네, 스테이지와 스테이지 사이에 입장하실 수 있어요.</p></div></details>
       <details><summary>사진이나 영상을 찍어도 되나요?</summary><div class="faq__a"><p>앵콜 무대부터 촬영하실 수 있어요.</p></div></details>
