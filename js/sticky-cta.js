@@ -11,6 +11,15 @@ export function initStickyCta() {
   const closing = document.getElementById('closing');
   if (!bar || !anchor || !('IntersectionObserver' in window)) return;
 
+  // root를 이 문서로: 페이지가 iframe 안에 있을 때(미리보기 frames) 바깥 화면이 아니라 iframe 화면으로 잰다.
+  // document를 root로 못 받는 옛 브라우저는 기본(최상위 화면)으로.
+  const observe = (cb, rootMargin, target) => {
+    let io;
+    try { io = new IntersectionObserver(cb, { root: document, rootMargin }); }
+    catch (e) { io = new IntersectionObserver(cb, { rootMargin }); }
+    io.observe(target);
+  };
+
   let passed = false;
   let atClosing = false;
   const update = () => {
@@ -18,16 +27,16 @@ export function initStickyCta() {
   };
 
   // root 아래쪽을 늘림 → 앵커가 화면 위로 완전히 벗어났을 때만 교차 해제
-  new IntersectionObserver(([e]) => {
+  observe(([e]) => {
     passed = !e.isIntersecting;
     update();
-  }, { rootMargin: `0px 0px ${FAR} 0px` }).observe(anchor);
+  }, `0px 0px ${FAR} 0px`, anchor);
 
   // root 위쪽을 늘림 → 마무리 섹션이 화면 아래 끝에 닿은 뒤로는 계속 교차
   if (closing) {
-    new IntersectionObserver(([e]) => {
+    observe(([e]) => {
       atClosing = e.isIntersecting;
       update();
-    }, { rootMargin: `${FAR} 0px 0px 0px` }).observe(closing);
+    }, `${FAR} 0px 0px 0px`, closing);
   }
 }

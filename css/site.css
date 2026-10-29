@@ -117,6 +117,9 @@ summary:focus-visible {
   color: var(--rose);
   font-size: .875em;
 }
+[data-hide-todo] .todo { padding: 0; border: 0; background: none; color: inherit; font-size: inherit; }
+[data-hide-todo] .is-todo { outline: none; }
+[data-hide-todo] .is-todo::after { content: none; }
 .is-todo { position: relative; outline: 2px dashed var(--pink); outline-offset: 3px; }
 .is-todo::after {
   content: "TODO";
