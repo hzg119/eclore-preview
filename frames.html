@@ -18,12 +18,13 @@ iframe{border:0;transform-origin:0 0;display:block}
 <a href="./strokes.html" target="_blank">제목 획 미리보기</a></header>
 <main id="m"></main>
 <script>
-const VPS = [[360, 780], [390, 844], [1440, 900]];
+// 인앱: 카톡·인스타처럼 위아래 툴바가 다 보여 세로가 짧은 폰 (390×844 화면에서 상태바·앱 바·하단 툴바를 뺀 높이)
+const VPS = [[390, 660, '인앱 (툴바 많음)'], [390, 844, '긴 폰'], [1440, 900, '데스크톱']];
 const m = document.getElementById('m');
 if (location.search.includes('edit')) { const a = document.getElementById('edl'); a.textContent = '편집 끄기'; a.href = '?'; }
-const frames = VPS.map(([w, h]) => {
+const frames = VPS.map(([w, h, name]) => {
   const f = document.createElement('figure');
-  f.innerHTML = `<figcaption>${w}×${h}</figcaption><div class="box"><iframe src="./${location.search}" width="${w}" height="${h}"></iframe></div>`;
+  f.innerHTML = `<figcaption>${name} · ${w}×${h}</figcaption><div class="box"><iframe src="./${location.search}" width="${w}" height="${h}"></iframe></div>`;
   m.append(f);
   return {w, h, box: f.querySelector('.box'), ifr: f.querySelector('iframe')};
 });
